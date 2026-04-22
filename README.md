@@ -153,7 +153,7 @@ SUB_STORE_FRONTEND_BACKEND_PATH = "/你的密码"
 
 ![添加变量](png/5.png)
 
-**⑥ 变量名填 `SUB_STORE_FRONTEND_BACKEND_PATH`，值填 `/你的密码`，保存**
+**⑥ 变量名填 `SUB_STORE_FRONTEND_BACKEND_PATH`，值填 `/你的密码`（注意必须带 `/` 开头，如 `/woain`），保存**
 
 ![填写变量](png/6.png)
 
