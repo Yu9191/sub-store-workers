@@ -306,6 +306,45 @@ npm run deploy
 
 esbuild 构建时会从 `Sub-Store/backend/src/` 读取最新源码，重新 build 即可包含新功能。
 
+## Surge 面板脚本
+
+`surge/` 目录下提供了一个 Surge Panel 脚本，可在 Surge 面板中实时监控 Cloudflare Workers 用量。
+
+### 功能
+
+- Workers / Pages 请求次数及占比
+- KV 读写次数
+- Sub-Store 订阅数量、后端版本（可选）
+- 中英文切换
+
+### 使用方式
+
+在 Surge 中安装模块：
+
+```
+https://raw.githubusercontent.com/Yu9191/sub-store-workers/main/surge/SubStorePanel.sgmodule
+```
+
+安装后编辑模块参数填入：
+
+| 参数 | 说明 |
+|---|---|
+| `ID` | Cloudflare Account ID |
+| `Token` | Cloudflare API Token |
+| `Limit` | 每日请求额度，默认 `100000` |
+| `SubStoreURL` | Sub-Store 后端地址（可选，如 `https://example.com/your-path`） |
+| `Lang` | 语言，`en` 或 `cn`，默认 `en` |
+
+### API Token 权限
+
+在 [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens) 页面创建 **Custom Token**，只需开启 **1 个权限**：
+
+| 权限 | 级别 |
+|---|---|
+| Account Analytics | Read |
+
+建议过期时间选「无过期时间」。
+
 ## 致谢
 
 基于 [Sub-Store](https://github.com/sub-store-org/Sub-Store) 项目，感谢原作者及所有贡献者。
