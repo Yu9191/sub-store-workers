@@ -110,6 +110,15 @@ const evalRewritePlugin = {
                 'false',
             );
 
+            if (args.path.endsWith(path.join('core', 'proxy-utils', 'processors', 'index.js'))) {
+                contents = contents.replace(
+                    /function createDynamicFunction\(name, script, \$arguments, \$options\) \{[\s\S]*?\n\}/,
+                    `function createDynamicFunction(name, script, $arguments, $options) {
+    throw new Error('Script Operator is not supported in Cloudflare Workers because dynamic code execution through eval/new Function is disabled. Use built-in filters/operators, mihomo YAML patch, or an external trusted execution service.');
+}`,
+                );
+            }
+
             if (contents !== original) {
                 return {
                     contents,

@@ -51,11 +51,19 @@ registerLogRoutes($app);
 export default {
     // 定时同步
     async scheduled(event, env, ctx) {
+        const kvError = validateKVBinding(env);
+        if (kvError) {
+            console.error(`[Cron] ${kvError.message}`);
+            return;
+        }
         ctx.waitUntil(cronSyncArtifacts(env));
     },
 
     async fetch(request, env, ctx) {
         try {
+            const kvError = validateKVBinding(env);
+            if (kvError) return kvError.response;
+
             // CORS 预检
             if (request.method === 'OPTIONS') {
                 return new Response(null, {
@@ -76,8 +84,13 @@ export default {
             // 前端后端地址填: https://xxx.pages.dev/你的密码
             // 管理 API 需要带前缀才能访问，分享链接（download/preview）不受影响
             const backendPath = env.SUB_STORE_FRONTEND_BACKEND_PATH;
+            const isPublicPath = /^\/(api\/download|api\/preview|api\/sub\/flow)/.test(pathname);
+            const isManagementApi = !isPublicPath && pathname.startsWith('/api/');
+            const isAuthDisabledManagementApi = !backendPath && isManagementApi;
+            if (isAuthDisabledManagementApi) {
+                console.warn(`[Security] SUB_STORE_FRONTEND_BACKEND_PATH is not configured; management API is publicly accessible: ${pathname}`);
+            }
             if (backendPath) {
-                const isPublicPath = /^\/(api\/download|api\/preview|api\/sub\/flow)/.test(pathname);
                 if (!isPublicPath && pathname.startsWith('/api/')) {
                     // 直接访问 /api/* 没带前缀，拒绝
                     return new Response(JSON.stringify({ status: 'failed', message: 'Unauthorized' }), {
@@ -122,6 +135,9 @@ export default {
 
             // 路由分发
             const response = await $app.handleRequest(request);
+            if (isAuthDisabledManagementApi) {
+                response.headers.set('X-Sub-Store-Security-Warning', 'SUB_STORE_FRONTEND_BACKEND_PATH is not configured; management API is public');
+            }
 
             // 回写 KV + 确保推送完成
             ctx.waitUntil(Promise.all([
@@ -155,6 +171,24 @@ export default {
         }
     },
 };
+
+function validateKVBinding(env) {
+    if (env?.SUB_STORE_DATA?.get && env?.SUB_STORE_DATA?.put) return null;
+    const body = JSON.stringify({
+        status: 'failed',
+        message: 'Missing KV binding: SUB_STORE_DATA. Please bind a Cloudflare KV namespace named SUB_STORE_DATA before running Sub-Store Workers.',
+    });
+    return {
+        message: 'Missing KV binding: SUB_STORE_DATA',
+        response: new Response(body, {
+            status: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+        }),
+    };
+}
 
 /** 定时同步 artifacts 到 Gist */
 async function cronSyncArtifacts(env) {

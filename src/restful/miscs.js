@@ -21,6 +21,7 @@ import { formatDateTime } from '@/utils';
 export default function register($app) {
     // utils
     $app.get('/api/utils/env', getEnv); // get runtime environment
+    $app.get('/api/utils/worker-status', getWorkerStatus);
     $app.get('/api/utils/backup', gistBackup); // gist backup actions
     $app.get('/api/utils/refresh', refresh);
 
@@ -125,6 +126,52 @@ function getEnv(req, res) {
                     ...env,
                     feature,
                     avatarUrl,
+                },
+            },
+            null,
+            2,
+        ),
+    );
+}
+
+function getWorkerStatus(req, res) {
+    const workerEnv = globalThis.__workerEnv || {};
+    const backendPath = workerEnv.SUB_STORE_FRONTEND_BACKEND_PATH;
+    const kv = workerEnv.SUB_STORE_DATA;
+    const dataKeys = {
+        subStore: $.cache && Object.keys($.cache).length > 0,
+        root: $.root && Object.keys($.root).length > 0,
+    };
+    res.set('Content-Type', 'application/json;charset=UTF-8').send(
+        JSON.stringify(
+            {
+                status: 'success',
+                data: {
+                    runtime: 'Cloudflare Workers',
+                    kv: {
+                        bound: Boolean(kv?.get && kv?.put),
+                        binding: 'SUB_STORE_DATA',
+                        dataKeys,
+                    },
+                    auth: {
+                        backendPathConfigured: Boolean(backendPath),
+                        managementApiPublic: !backendPath,
+                    },
+                    capabilities: {
+                        scriptOperator: {
+                            supported: false,
+                            reason: 'Cloudflare Workers does not allow dynamic code execution through eval/new Function.',
+                            alternatives: [
+                                'Use built-in filters/operators',
+                                'Use mihomo YAML patch scripts',
+                                'Run custom JavaScript in an external trusted execution service',
+                            ],
+                        },
+                        gistBackup: true,
+                        cron: true,
+                        localFileSystem: false,
+                        socksProxy: false,
+                    },
                 },
             },
             null,
