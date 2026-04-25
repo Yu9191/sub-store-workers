@@ -8,6 +8,8 @@
     "dev": "wrangler dev",
     "deploy": "npm run build && wrangler deploy",
     "deploy:pages": "npm run build && node -e \"require('fs').copyFileSync('dist/worker.js','pages-dist/_worker.js')\" && wrangler pages deploy pages-dist --project-name sub-store --branch main --no-bundle",
+    "rotate-secret": "powershell -ExecutionPolicy Bypass -File scripts/rotate-secret.ps1",
+    "rotate-secret:sh": "bash scripts/rotate-secret.sh",
     "prepush": "node -e \"let f=require('fs'),t=f.readFileSync('wrangler.toml','utf8');if(!t.includes('你的KV命名空间ID')){console.error('\\x1b[31m请先清除 wrangler.toml 中的 KV ID!\\x1b[0m');process.exit(1)}\""
   },
   "dependencies": {
