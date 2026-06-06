@@ -212,19 +212,18 @@ function createTokenItem(payload, options = {}) {
                 `Invalid custom token: ${token}`,
             );
         }
+        // Workers 幂等更新：KV cacheTtl 可能导致前端 DELETE+POST 读到旧数据
+        // 遇到重复 token 时先删除旧的，再创建新的（而非报错）
         const tokens = $.read(TOKENS_KEY) || [];
-        if (
-            tokens.find(
-                (item) =>
-                    item.token === token &&
-                    item.type === type &&
-                    item.name === name,
-            )
-        ) {
-            throw new RequestInvalidError(
-                'DUPLICATE_TOKEN',
-                `Token ${token} already exists`,
-            );
+        const existingIndex = tokens.findIndex(
+            (item) =>
+                item.token === token &&
+                item.type === type &&
+                item.name === name,
+        );
+        if (existingIndex >= 0) {
+            tokens.splice(existingIndex, 1);
+            $.write(tokens, TOKENS_KEY);
         }
     }
 
