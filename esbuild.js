@@ -114,7 +114,12 @@ const evalRewritePlugin = {
                 contents = contents.replace(
                     /function createDynamicFunction\(name, script, \$arguments, \$options\) \{[\s\S]*?\n\}/,
                     `function createDynamicFunction(name, script, $arguments, $options) {
-    throw new Error('Script Operator is not supported in Cloudflare Workers because dynamic code execution through eval/new Function is disabled. Use built-in filters/operators, mihomo YAML patch, or an external trusted execution service.');
+    const engine = globalThis.__workerEnv?.SCRIPT_ENGINE;
+    if (engine === 'quickjs') {
+        const { createScriptFunction } = require('@/vendor/quickjs-executor');
+        return createScriptFunction(script, name, $arguments, $options);
+    }
+    throw new Error('Script Operator is not supported. Set SCRIPT_ENGINE="quickjs" in wrangler.toml [vars] to enable. Alternative: use built-in filters/operators, mihomo YAML patch, or an external trusted execution service.');
 }`,
                 );
             }
@@ -275,6 +280,10 @@ const nodeStubPlugin = {
         target: 'es2022',
         outfile: path.join(__dirname, 'dist', 'worker.js'),
         plugins: [aliasPlugin, peggyPrecompilePlugin, evalRewritePlugin, nodeStubPlugin],
+        loader: {
+            '.wasm': 'copy',
+        },
+        assetNames: '[name]',
         define: {
             'process.env.NODE_ENV': '"production"',
         },

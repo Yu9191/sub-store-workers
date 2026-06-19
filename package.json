@@ -13,6 +13,7 @@
     "prepush": "node -e \"let f=require('fs'),t=f.readFileSync('wrangler.toml','utf8');if(!t.includes('你的KV命名空间ID')){console.error('\\x1b[31m请先清除 wrangler.toml 中的 KV ID!\\x1b[0m');process.exit(1)}\""
   },
   "dependencies": {
+    "@jitl/quickjs-wasmfile-release-sync": "^0.32.0",
     "age-encryption": "^0.3.0",
     "buffer": "^6.0.3",
     "ip-address": "^9.0.5",
@@ -23,6 +24,7 @@
     "ms": "^2.1.3",
     "nanoid": "^3.3.3",
     "peggy": "^2.0.1",
+    "quickjs-emscripten": "^0.32.0",
     "semver": "^7.6.3",
     "static-js-yaml": "^1.0.0",
     "yaml": "^2.9.0"
