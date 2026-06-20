@@ -592,6 +592,7 @@ https://raw.githubusercontent.com/Yu9191/sub-store-workers/main/surge/SubStorePa
 ## 致谢
 
 基于 [Sub-Store](https://github.com/sub-store-org/Sub-Store) 项目，感谢原作者及所有贡献者。
+反馈请在 [LINUX DO](https://linux.do) 站内反馈
 
 ## 许可证
 
