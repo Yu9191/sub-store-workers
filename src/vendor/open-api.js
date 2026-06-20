@@ -201,6 +201,10 @@ export class OpenAPI {
         console.log(`[${this.name}] INFO: ${msg}`);
     }
 
+    warn(msg) {
+        console.log(`[${this.name}] WARN: ${msg}`);
+    }
+
     error(msg) {
         console.log(`[${this.name}] ERROR: ${msg}`);
     }

@@ -33,6 +33,12 @@ Sub-Store 后端的 Cloudflare Workers 移植版
 - **完整功能**：复用原始后端全部业务逻辑（订阅管理、格式转换、下载、预览等）
 - **预编译解析器**：peggy 文法在构建时编译，避免运行时 eval()
 
+## 相较原仓库的新增功能
+
+- **脚本过滤 / 操作支持**：通过 QuickJS WASM 沙箱在 Workers 运行时执行用户脚本，支持 Script Filter 和 Script Operator（含快捷脚本与函数式脚本），弥补了原仓库因 Workers 禁止 `eval` / `new Function` 而无法使用脚本操作的限制
+- **脚本引擎可切换**：`wrangler.toml` 中通过 `[vars] SCRIPT_ENGINE` 控制脚本引擎，设为 `"quickjs"` 启用，未设置则禁用并返回引导提示
+- **OpenAPI 适配层补全**：修复 Workers 版 `OpenAPI` 缺失 `warn` 方法导致解析订阅时 `I.warn is not a function` 报错的问题
+
 ## 目录
 
 - [部署](#部署)（核心流程，建议从这里开始）
