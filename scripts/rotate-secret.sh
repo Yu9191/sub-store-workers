@@ -43,8 +43,14 @@ if [[ "$LENGTH" -lt 16 ]]; then
     exit 1
 fi
 
-# 生成 URL-safe 随机字符串：从 base64 中过滤出 [A-Za-z0-9]
-RAND_RAW="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c "$LENGTH")"
+# 生成 URL-safe 随机字符串：过滤出 [A-Za-z0-9]
+# 注意：先用 head 从 /dev/urandom 取有限字节再喂给 tr，避免 tr 写入已关闭的管道被
+# SIGPIPE 杀掉（退出码 141），在 set -o pipefail 下会导致脚本静默退出。
+RAND_RAW=""
+while [[ ${#RAND_RAW} -lt "$LENGTH" ]]; do
+    RAND_RAW+="$(head -c 256 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9')"
+done
+RAND_RAW="${RAND_RAW:0:LENGTH}"
 PATH_VALUE="/${RAND_RAW}"
 
 echo "[rotate-secret] 已生成新密码，长度 ${#PATH_VALUE} 位（含 /）"
