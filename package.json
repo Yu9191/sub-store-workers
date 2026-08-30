@@ -10,7 +10,7 @@
     "deploy:pages": "npm run build && node -e \"const fs=require('fs');fs.mkdirSync('pages-dist',{recursive:true});fs.copyFileSync('dist/worker.js','pages-dist/_worker.js');fs.copyFileSync('dist/quickjs.wasm','pages-dist/quickjs.wasm')\" && wrangler pages deploy pages-dist --project-name sub-store --branch main",
     "rotate-secret": "powershell -ExecutionPolicy Bypass -File scripts/rotate-secret.ps1",
     "rotate-secret:sh": "bash scripts/rotate-secret.sh",
-    "prepush": "node -e \"let f=require('fs'),t=f.readFileSync('wrangler.toml','utf8');if(!t.includes('你的KV命名空间ID')){console.error('\\x1b[31m请先清除 wrangler.toml 中的 KV ID!\\x1b[0m');process.exit(1)}\""
+    "prepush": "node -e \"let f=require('fs'),t=f.readFileSync('wrangler.toml','utf8');if(!t.includes('\u4f60\u7684KV\u547d\u540d\u7a7a\u95f4ID')){console.error('\\x1b[31m\u8bf7\u5148\u6e05\u9664 wrangler.toml \u4e2d\u7684 KV ID!\\x1b[0m');process.exit(1)}\""
   },
   "dependencies": {
     "@jitl/quickjs-wasmfile-release-sync": "^0.32.0",
@@ -33,5 +33,8 @@
   "devDependencies": {
     "esbuild": "^0.19.8",
     "wrangler": "^4.84.1"
+  },
+  "overrides": {
+    "minimist": "1.2.6"
   }
 }
